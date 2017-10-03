@@ -4,7 +4,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/cloudfoundry-community/go-cfenv"
 	"github.com/garyburd/redigo/redis"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -25,18 +24,6 @@ var (
 	blockchainAPI string
 	store         = sessions.NewCookieStore([]byte("BlockParty"))
 )
-
-type cfServices struct {
-	Services []cfService `json:"services"`
-}
-
-type cfService struct {
-	Platform string `json:"platform"`
-	Name     string `json:"service"`
-	Host     string `json:"host"`
-	Port     string `json:"port"`
-	Password string `json:"password"`
-}
 
 //House that will be listed
 type House struct {
@@ -128,17 +115,13 @@ type UserList struct {
 	Data []User `json:"data" redis:"data"`
 }
 
-func newPool(addr string, port string, password string) *redis.Pool {
+func newPool(addr string, port string) *redis.Pool {
 	return &redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", addr+":"+port)
 			if err != nil {
-				return nil, err
-			}
-			if _, err := c.Do("AUTH", password); err != nil {
-				c.Close()
 				return nil, err
 			}
 			return c, nil
@@ -358,55 +341,13 @@ func setAppraisal(i string, u string, a string) error {
 	return err
 }
 func initialize() {
-	var cfServices cfServices
 	fmt.Println("Starting")
-	file, err := ioutil.ReadFile("./services.json")
-	check("Read services JSON", err)
 
-	err = json.Unmarshal(file, &cfServices)
-	check("Unmarshal", err)
-
-	env, _ := cfenv.Current()
-	mainURL = "http://" + env.ApplicationURIs[0]
-	services := env.Services
+	mainURL = "http://localhost"
 	blockchainAPI = os.Getenv("BLOCKCHAINAPI")
 
-	var credentials map[string]interface{}
-	var host string
-	var password string
-	var port string
-
-	for _, service := range cfServices.Services {
-		if _, ok := services[service.Name]; ok {
-			credentials = services[service.Name][0].Credentials
-			if _, ok := credentials[service.Host]; ok {
-				host = credentials[service.Host].(string)
-			} else {
-				log.Fatal("Unable to identify Redis host from config. Platform attempted:" + service.Platform)
-			}
-			if _, ok := credentials[service.Password]; ok {
-				password = credentials[service.Password].(string)
-			} else {
-				log.Fatal("Unable to identify Redis password from config. Platform attempted:" + service.Platform)
-			}
-			if _, ok := credentials[service.Port]; ok {
-				switch credentials[service.Port].(type) {
-				case string:
-					port = credentials[service.Port].(string)
-				case float64:
-					port = strconv.FormatFloat(credentials[service.Port].(float64), 'f', -1, 64)
-				default:
-					log.Fatal("Redis port value is of unexpected type.")
-				}
-			} else {
-				log.Fatal("Unable to identify Redis port from config. Platform attempted:" + service.Platform)
-			}
-			break
-		}
-	}
-
 	store.Options = &sessions.Options{MaxAge: 0}
-	pool = newPool(host, port, password)
+	pool = newPool("localhost", "6379")
 	setDefaultHouses()
 	setDefaultUsers()
 	setDefaultAddresses()

@@ -5,18 +5,23 @@ RUN apt-get update && apt-get -y install software-properties-common
 RUN add-apt-repository -y ppa:gophers/archive
 RUN apt-get update && apt-get -y install golang-1.9-go
 RUN apt-get -y install git # necessary for go get to download source code from remote git repositories
+RUN apt-get -y install redis-server
 WORKDIR /root/adl
 
 ENV PATH "$PATH:/usr/lib/go-1.9/bin"
-RUN go get -v -u github.com/cloudfoundry-community/go-cfenv
+#TODO use https://github.com/tools/godep to install the dependencies with 'godep restore'
 RUN go get -v -u github.com/garyburd/redigo/redis
 RUN go get -v -u github.com/gorilla/mux
 RUN go get -v -u github.com/gorilla/sessions
 RUN go get -v -u github.com/satori/go.uuid
 
+#stage
 COPY *.go .
 COPY services.json .
 
+#compile
 RUN go build blockparty.go
 
+#start
+RUN redis-server &
 EXPOSE 8080
