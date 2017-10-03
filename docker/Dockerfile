@@ -17,11 +17,19 @@ RUN go get -v -u github.com/satori/go.uuid
 
 #stage
 COPY *.go .
-COPY services.json .
+COPY houses.json .
+COPY users.json .
+COPY addresses.json .
+COPY css /app/css/
+COPY fonts /app/fonts/
+COPY images /app/images/
+COPY js /app/js/
+COPY templates templates/
 
 #compile
 RUN go build blockparty.go
 
 #start
-RUN redis-server &
+RUN systemctl enable redis-server
+#RUN systemctl start redis-server
 EXPOSE 8080
