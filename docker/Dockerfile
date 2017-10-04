@@ -16,7 +16,6 @@ RUN go get -v -u github.com/gorilla/sessions
 RUN go get -v -u github.com/satori/go.uuid
 
 #stage
-COPY *.go .
 COPY houses.json .
 COPY users.json .
 COPY addresses.json .
@@ -25,11 +24,13 @@ COPY fonts /app/fonts/
 COPY images /app/images/
 COPY js /app/js/
 COPY templates templates/
+COPY launch.sh .
+COPY *.go .
 
 #compile
 RUN go build blockparty.go
 
 #start
 RUN systemctl enable redis-server
-#RUN systemctl start redis-server
 EXPOSE 8080
+ENTRYPOINT ["/bin/bash", "launch.sh"]

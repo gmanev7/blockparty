@@ -340,10 +340,10 @@ func setAppraisal(i string, u string, a string) error {
 	check("HSET", err)
 	return err
 }
-func initialize() {
-	fmt.Println("Starting")
+func initialize(host string, port string) {
+	mainURL = "http://"+ host + ":" + port
+	fmt.Println("Starting on ", mainURL)
 
-	mainURL = "http://localhost"
 	blockchainAPI = os.Getenv("BLOCKCHAINAPI")
 
 	store.Options = &sessions.Options{MaxAge: 0}
@@ -1224,7 +1224,14 @@ func getHouseInfoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	initialize()
+    if len(os.Args) < 3 {
+        fmt.Println("Insufficient arguments")
+        fmt.Println("Usage: blockparty <host> <port>")
+    }
+    host := os.Args[1]
+    port := os.Args[2]
+	initialize(host, port)
+
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", listingsHandler)
 	router.HandleFunc("/seller", sellerHandler)
@@ -1266,5 +1273,5 @@ func main() {
 	http.Handle("/fonts/", http.FileServer(http.Dir("/app")))
 	http.Handle("/js/", http.FileServer(http.Dir("/app")))
 	http.Handle("/", router)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":" + port, nil))
 }
