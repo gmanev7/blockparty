@@ -16,18 +16,19 @@ var houseMortgageRejectEvent;
 var houseSoldEvent;
 var houseMortgageHigherThanBidEvent;
 
+var unlockAccountSec = 1000;
 
 function callHouseForSale(c,ap,s) {
     queryContract = web3.eth.contract(abi);
     contract = queryContract.at(c);
-    web3.personal.unlockAccount(s, "password01");
+    web3.personal.unlockAccount(s, "password01", unlockAccountSec);
     contract.forSale(ap, {from: s});
 }
 
 function callHouseNotForSale(c,s) {
     queryContract = web3.eth.contract(abi);
     contract = queryContract.at(c);
-    web3.personal.unlockAccount(s, "password01");
+    web3.personal.unlockAccount(s, "password01", unlockAccountSec);
     contract.notForSale({from: s});
 }
 
@@ -36,7 +37,7 @@ function callHousePlaceBid(c,b,u) {
     contract = queryContract.at(c);
     // Now that a bid has been placed, the price of the house can't be changed
     // and the house can't be removed from the market
-    web3.personal.unlockAccount(u, "password01", 1000);
+    web3.personal.unlockAccount(u, "password01", unlockAccountSec);
     contract.placeBid(b, { from: u, gas: maxGas});
 }
 
@@ -44,7 +45,7 @@ function callHouseAcceptBid(c,u) {
     queryContract = web3.eth.contract(abi);
     contract = queryContract.at(c);
     address="0xbc006b353770becc7fdecfd11eff9633a3ea651f"
-    web3.personal.unlockAccount(address, "password01");
+    web3.personal.unlockAccount(address, "password01", unlockAccountSec);
     contract.acceptBid(u,{from: address, gas: maxGas});
 }
 
@@ -52,7 +53,7 @@ function callHouseRejectBid(c,b,u) {
     queryContract = web3.eth.contract(abi);
     contract = queryContract.at(c);
     address="0xbc006b353770becc7fdecfd11eff9633a3ea651f"
-        web3.personal.unlockAccount(address, "password01");
+    web3.personal.unlockAccount(address, "password01", unlockAccountSec);
     contract.rejectBid(u, b, {from: address, gas: maxGas});
 }
 
@@ -60,7 +61,7 @@ function callHouseApplyMortgage(c,a) {
     queryContract = web3.eth.contract(abi);
     contract = queryContract.at(c);
     l="0xf82335bf229a2eeee898108125937b34eaddc457"
-    web3.personal.unlockAccount(l, "password01", 1000);
+    web3.personal.unlockAccount(l, "password01", unlockAccountSec);
     contract.applyMortgage(a, { from: l, gas: maxGas});
 }
 
@@ -69,7 +70,7 @@ function callHouseChangeMortgageValue(c,a) {
     queryContract = web3.eth.contract(abi);
     contract = queryContract.at(c);
     l="0xf82335bf229a2eeee898108125937b34eaddc457"
-    web3.personal.unlockAccount(l, "password01", 1000);
+    web3.personal.unlockAccount(l, "password01", unlockAccountSec);
     contract.changeMortgageValue(a, { from: l, gas: maxGas});
 }
 
@@ -79,7 +80,7 @@ function callRejectMortgage() {
     var mortgageValue = document.getElementById('houseMortgageValue').value;
 
     document.getElementById('status').innerText = "Waiting for the transaction to accept the mortgage from " + lenderAddress + " for a value of $" + mortgageValue;
-    web3.personal.unlockAccount(lenderAddress, "password01", 1000);
+    web3.personal.unlockAccount(lenderAddress, "password01", unlockAccountSec);
     contract.rejectMortgage(mortgageValue);
 }
 
@@ -87,7 +88,7 @@ function callHouseAppraisal(c,a) {
     queryContract = web3.eth.contract(abi);
     contract = queryContract.at(c);
     address="0x863c91fbf1b60de5d63f199a5e1ec4eec96b3857"
-        web3.personal.unlockAccount(address, "password01", 1000);
+    web3.personal.unlockAccount(address, "password01", unlockAccountSec);
     contract.setAppraisalValue(a, { from: address, gas: maxGas});
 }
 

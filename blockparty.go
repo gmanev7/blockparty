@@ -340,11 +340,11 @@ func setAppraisal(i string, u string, a string) error {
 	check("HSET", err)
 	return err
 }
-func initialize(host string, port string) {
-	mainURL = "http://"+ host + ":" + port
+func initialize(host_http string, port_http string, port_eth string) {
+	mainURL = "http://"+ host_http + ":" + port_http
 	fmt.Println("Starting on ", mainURL)
 
-	blockchainAPI = os.Getenv("BLOCKCHAINAPI")
+	blockchainAPI = host_http + ":" + port_eth
 
 	store.Options = &sessions.Options{MaxAge: 0}
 	pool = newPool("localhost", "6379")
@@ -1224,13 +1224,14 @@ func getHouseInfoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-    if len(os.Args) < 3 {
+    if len(os.Args) < 4 {
         fmt.Println("Insufficient arguments")
-        fmt.Println("Usage: blockparty <host> <port>")
+        fmt.Println("Usage: blockparty <host_http> <port_http> <port_eth>")
     }
-    host := os.Args[1]
-    port := os.Args[2]
-	initialize(host, port)
+    host_http := os.Args[1]
+    port_http := os.Args[2]
+    port_eth := os.Args[3]
+	initialize(host_http, port_http, port_eth)
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", listingsHandler)
@@ -1273,5 +1274,5 @@ func main() {
 	http.Handle("/fonts/", http.FileServer(http.Dir("/app")))
 	http.Handle("/js/", http.FileServer(http.Dir("/app")))
 	http.Handle("/", router)
-	log.Fatal(http.ListenAndServe(":" + port, nil))
+	log.Fatal(http.ListenAndServe(":" + port_http, nil))
 }
