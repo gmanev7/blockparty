@@ -24,7 +24,7 @@ RUN go build blockparty.go
 FROM localhost:5000/adl/dell-demo:latest
 LABEL Description="Dell Blockparty Web App (https://github.com/seethedata/blockparty) backed by locally deployed Ethereum implementation"
 
-RUN apt-get -y install redis-server
+RUN apt-get update && apt-get -y install redis-server
 COPY --from=0 /root/adl/blockparty .
 
 COPY houses.json .
