@@ -17,4 +17,4 @@ echo "Started Redis"
 #172.17.0.2 is by default the IP of the first container on the bridge network - it is currently used by the local Docker registry container
 
 echo "Starting the UI server ..."
-./blockparty 172.17.0.3 8080 ${ethPort}
+./blockparty 10.27.114.187 8080 ${ethPort}
